@@ -70,7 +70,9 @@ end
 
 local function stonefistAverageRanges(text)
 	return (text:gsub("%((%-?%d+%.?%d*)%-(%-?%d+%.?%d*)%)", function(a, b)
-		return tostring(m_floor((tonumber(a) + tonumber(b)) / 2 + 0.5))
+		local value = (tonumber(a) + tonumber(b)) / 2
+		local precision = (a:find("%.") or b:find("%.")) and 100 or 1
+		return tostring(m_floor(value * precision + 0.5) / precision)
 	end))
 end
 
@@ -2250,6 +2252,14 @@ function ItemClass:ResolveStonefistModId(modLine)
 end
 
 function ItemClass:CreateStonefistVariant(displayLevel)
+	if not self.base or self.base.type ~= "Gloves" or self.baseName:find("Fists of Stone", 1, true) then
+		return nil
+	end
+	local sourceRaw = self:BuildRaw()
+	if self.stonefistSourceRaw ~= sourceRaw then
+		self.stonefistVariantCache = nil
+		self.stonefistSourceRaw = sourceRaw
+	end
 	local map = data.stonefistMap
 	if not map then
 		return nil
@@ -2265,7 +2275,7 @@ function ItemClass:CreateStonefistVariant(displayLevel)
 		cache = { }
 		self.stonefistVariantCache = cache
 	end
-	local clone = new("Item", self:BuildRaw())
+	local clone = new("Item"):Item(self:BuildRaw())
 	local newExplicit = { }
 	local emitted = { }
 	local changed = false
@@ -2282,7 +2292,10 @@ function ItemClass:CreateStonefistVariant(displayLevel)
 				if entry then
 					for i = 1, #entry do
 						if type(entry[i]) == "string" then
-							local text = stonefistAverageRanges(entry[i])
+							if entry[i]:find("%((%-?%d+%.?%d*)%-(%-?%d+%.?%d*)%)") then
+							clone.stonefistEstimated = true
+						end
+						local text = stonefistAverageRanges(entry[i])
 							local list, extra = modLib.parseMod(text)
 							t_insert(newExplicit, { line = stonefistComputePerLevel(text, displayLevel), modList = list or { }, extra = extra })
 						end
@@ -2313,8 +2326,9 @@ function ItemClass:CreateStonefistVariant(displayLevel)
 				end
 			end
 			for i = #lines, 1, -1 do
-				local list, extra = modLib.parseMod(lines[i])
-				t_insert(clone.implicitModLines, 1, { line = stonefistComputePerLevel(lines[i], displayLevel), modList = list or { }, extra = extra })
+				local implicitLine = lines[i]:gsub("{[^}]*}", "")
+				local list, extra = modLib.parseMod(implicitLine)
+				t_insert(clone.implicitModLines, 1, { line = stonefistComputePerLevel(implicitLine, displayLevel), unscalable = true, modList = list or { }, extra = extra })
 			end
 		end
 		changed = true

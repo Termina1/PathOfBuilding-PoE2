@@ -3729,6 +3729,9 @@ function ItemsTabClass:AddItemTooltip(tooltip, item, slot, dbMode, maxWidth)
 		stonefistVariant = item:CreateStonefistVariant(self.build.characterLevel)
 	end
 	local displayVariant = stonefistVariant or item
+	if stonefistVariant and stonefistVariant.stonefistEstimated then
+		tooltip:AddLine(fontSizeSmall, colorCodes.WARNING.."Stonefist preview: converted rolls use tier midpoints. Import transformed gloves for exact values.")
+	end
 	-- Item name
 	if displayVariant.title then
 		tooltip:AddLine(fontSizeTitle, rarityCode..displayVariant.title, "FONTIN SC")
@@ -4053,7 +4056,7 @@ function ItemsTabClass:AddItemTooltip(tooltip, item, slot, dbMode, maxWidth)
 		if stonefistVariant and origList == item.explicitModLines then
 			modList = stonefistVariant.explicitModLines
 		elseif stonefistVariant and origList == item.implicitModLines then
-			modList = { }
+			modList = stonefistVariant.implicitModLines
 		end
 		if modList[1] then
 			for _, modLine in ipairs(modList) do
