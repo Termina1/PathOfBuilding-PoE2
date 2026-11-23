@@ -156,4 +156,24 @@ describe("TestStonefist", function()
 		local variant = item:CreateStonefistVariant()
 		assert.are.equals(item.enchantModLines[1].line, variant.enchantModLines[1].line)
 	end)
+
+	it("updates actual melee gem level and base critical chance when allocated", function()
+		build.spec:SelectClass(10)
+		build.spec:SelectAscendClass(1)
+		build.itemsTab:CreateDisplayItemFromRaw("New Item\nSinister Quarterstaff")
+		build.itemsTab:AddDisplayItem()
+		build.itemsTab:CreateDisplayItemFromRaw("New Item\nSombre Gloves\n+2 to Level of all Melee Skills\n31% increased Critical Damage Bonus")
+		build.itemsTab:AddDisplayItem()
+		build.skillsTab:PasteSocketGroup("Falling Thunder 16/0  1")
+		build.buildFlag = true
+		runCallback("OnFrame")
+		local beforeLevel = build.calcsTab.mainOutput.GemLevel
+		local beforeCrit = build.calcsTab.mainOutput.CritChance
+		assert.are.equals(18, beforeLevel)
+		build.spec:AllocNode(build.spec.nodes[39595])
+		build.buildFlag = true
+		runCallback("OnFrame")
+		assert.are.equals(17, build.calcsTab.mainOutput.GemLevel)
+		assert.is_true(build.calcsTab.mainOutput.CritChance > beforeCrit)
+	end)
 end)
