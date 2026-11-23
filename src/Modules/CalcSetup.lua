@@ -1469,6 +1469,10 @@ function calcs.initEnv(build, mode, override, specEnv)
 			end
 
 			if item then
+				local stonefistGloves = item.base and item.base.type == "Gloves" and nodesModsList:Flag(nil, "WayOfTheStonefist")
+				if stonefistGloves then
+					item = item:CreateStonefistVariant() or item
+				end
 				env.player.itemList[slotName] = item
 				-- Merge mods for this item
 				local srcList = item:GetActiveModListForSlotNum(slot.slotNum, canUseBonded)
@@ -1497,9 +1501,9 @@ function calcs.initEnv(build, mode, override, specEnv)
 						source = "Item",
 						sourceItem = item,
 						sourceSlot = slotName,
-						Str = item.requirements.strMod,
-						Dex = item.requirements.dexMod,
-						Int = item.requirements.intMod,
+						Str = not stonefistGloves and item.requirements.strMod or nil,
+						Dex = not stonefistGloves and item.requirements.dexMod or nil,
+						Int = not stonefistGloves and item.requirements.intMod or nil,
 					})
 				end
 				-- Rune / Soul Core / Idol Sockets
