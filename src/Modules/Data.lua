@@ -265,7 +265,6 @@ data.misc = { -- magic numbers
 	EnergyShieldRechargeDelay = 4,
 	Transfiguration = 0.3,
 	EnemyMaxResist = data.monsterConstants["base_maximum_all_resistances_%"],
-	LeechRateBase = 0.02,
 	DotDpsCap = 35791394, -- (2 ^ 31 - 1) / 60 (int max / 60 seconds)
 	BleedPercentBase = data.gameConstants["BleedingHitDamagePercentPerMinute"] / 60 / 100,
 	BleedDurationBase = data.gameConstants["BaseBleedingDuration"],
@@ -698,8 +697,11 @@ data.itemMods = {
 	Corruption = LoadModule("Data/ModCorrupted"),
 	Runes = LoadModule("Data/ModRunes"),
 	Exclusive = LoadModule("Data/ModItemExclusive"),
-	Desecrated = LoadModule("Data/ModVeiled")
+	Desecrated = LoadModule("Data/ModVeiled"),
+	FistsOfStone = LoadModule("Data/ModFistsOfStone")
 }
+
+data.stonefistMap = LoadModule("Data/DataStonefistMap")
 
 -- update JewelRadius affixes for Time-Lost jewels
 do

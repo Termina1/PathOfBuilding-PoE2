@@ -49,16 +49,10 @@ function calcs.initModDB(env, modDB)
 	modDB:NewMod("AbsorptionChargesMax", "BASE", 0, "Base")
 	modDB:NewMod("AfflictionChargesMax", "BASE", 0, "Base")
 	modDB:NewMod("BloodChargesMax", "BASE", 5, "Base")
-	modDB:NewMod("MaxLifeLeechRate", "BASE", 20, "Base")
-	modDB:NewMod("MaxManaLeechRate", "BASE", 20, "Base")
 	modDB:NewMod("ImpaleStacksMax", "BASE", 5, "Base")
 	modDB:NewMod("IgniteStacksMax", "BASE", 1, "Base")
 	modDB:NewMod("BleedStacksMax", "BASE", 1, "Base")
 	modDB:NewMod("PoisonStacksMax", "BASE", 1, "Base")
-	modDB:NewMod("MaxEnergyShieldLeechRate", "BASE", 10, "Base")
-	modDB:NewMod("MaxLifeLeechInstance", "BASE", 10, "Base")
-	modDB:NewMod("MaxManaLeechInstance", "BASE", 10, "Base")
-	modDB:NewMod("MaxEnergyShieldLeechInstance", "BASE", 10, "Base")
 	modDB:NewMod("TrapThrowingTime", "BASE", 0.6, "Base")
 	modDB:NewMod("MineLayingTime", "BASE", 0.3, "Base")
 	modDB:NewMod("WarcryCastTime", "BASE", 0.8, "Base")
@@ -1469,6 +1463,10 @@ function calcs.initEnv(build, mode, override, specEnv)
 			end
 
 			if item then
+				local stonefistGloves = item.base and item.base.type == "Gloves" and nodesModsList:Flag(nil, "WayOfTheStonefist")
+				if stonefistGloves then
+					item = item:CreateStonefistVariant() or item
+				end
 				env.player.itemList[slotName] = item
 				-- Merge mods for this item
 				local srcList = item:GetActiveModListForSlotNum(slot.slotNum, canUseBonded)
@@ -1497,9 +1495,9 @@ function calcs.initEnv(build, mode, override, specEnv)
 						source = "Item",
 						sourceItem = item,
 						sourceSlot = slotName,
-						Str = item.requirements.strMod,
-						Dex = item.requirements.dexMod,
-						Int = item.requirements.intMod,
+						Str = not stonefistGloves and item.requirements.strMod or nil,
+						Dex = not stonefistGloves and item.requirements.dexMod or nil,
+						Int = not stonefistGloves and item.requirements.intMod or nil,
 					})
 				end
 				-- Rune / Soul Core / Idol Sockets
