@@ -87,4 +87,31 @@ describe("TestLeech", function()
 		assert.True(output.LifeLeechInstances > 1)
 		assert.True(output.LifeLeechCritActive > critChance)
 	end)
+	it("scales mana leech from one to three percent without pool caps", function()
+		local mods = "Your hits can't be Evaded\nNever deal Critical Hits\nAdds 1000 to 1000 Physical Damage\n"
+		local one = setMods(mods .. "1% of Physical Attack Damage Leeched as Mana").ManaLeechPerHit
+		assert.True(one > 0)
+		local three = setMods(mods .. "3% of Physical Attack Damage Leeched as Mana").ManaLeechPerHit
+		assert.are.near(one * 3, three, 1e-8)
+	end)
+
+	it("does not scale mana leech amount or rate with maximum mana", function()
+		local mods = baseMods .. "3% of Physical Attack Damage Leeched as Mana\n"
+		local before = setMods(mods)
+		local amount, rate, pool = before.ManaLeechPerHit, before.ManaLeechRate, before.Mana
+		local after = setMods(mods .. "+10000 to maximum Mana")
+		assert.True(after.Mana > pool)
+		assert.are.near(amount, after.ManaLeechPerHit, 1e-8)
+		assert.are.near(rate, after.ManaLeechRate, 1e-8)
+	end)
+
+	it("applies level 80 resistance to mana leech and keeps percentage scaling", function()
+		local mods = baseMods .. "3% of Physical Attack Damage Leeched as Mana\n"
+		local base = setMods(mods).ManaLeechPerHit
+		build.configTab.input.enemyLevel = 80
+		local output = setMods(mods)
+		assert.are.near(base * (1 - data.monsterLeechResistanceTable[80] / 10000), output.ManaLeechPerHit, 1e-8)
+		assert.are.near(1, output.ManaLeechDuration, 1e-8)
+	end)
+
 end)
